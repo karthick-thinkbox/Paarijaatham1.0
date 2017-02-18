@@ -78,33 +78,40 @@ def billpage(request,uid):
     if request.method == "POST":
         if status =="Sold Out":
             return redirect('sold_page',pk=uid ,flag="soldout" )
-            
-        form=salesform(request.POST,request.FILES ,instance=row)
-        try:
-            
+        else:  
+            form=salesform(request.POST,request.FILES ,instance=row)
             if form.is_valid():
-                sales_price=form.cleaned_data['sold_price']
-                cname=form.cleaned_data['cust_name']
-                cemail=form.cleaned_data['cust_Email']
-                cmobile=form.cleaned_data['cust_phone']
-                sprofit=int(sales_price) - cost
-                #row=form.save(commit=False)
-                row.sold_price=sales_price
-                row.cust_name=cname
-                row.cust_phone=cmobile
-                row.cust_Email=cemail
-                row.profit=sprofit
-                row.sales_status="Sold Out"
-                row.sold_by=str(current_user)
-                row.sales_date=date.today()
-                row.save()
-                
-                return redirect('sold_page',pk=uid,flag="deal")
-        
-        except Exception as e:
-            return redirect('bill_page',{'Billing Error':str(e)},uid=item_id)
-                
+                try:
+                    
+                    sales_price=form.cleaned_data['sold_price']
+                    cname=form.cleaned_data['cust_name']
+                    cemail=form.cleaned_data['cust_Email']
+                    cmobile=form.cleaned_data['cust_phone']
+                    sprofit=int(sales_price) - cost
+                    #row=form.save(commit=False)
+                    row.sold_price=sales_price
+                    row.cust_name=cname
+                    row.cust_phone=cmobile
+                    row.cust_Email=cemail
+                    row.profit=sprofit
+                    row.sales_status="Sold Out"
+                    row.sold_by=str(current_user)
+                    row.sales_date=date.today()
+                    row.save()
+                    return redirect('sold_page',pk=uid,flag="deal")
+                except Exception as e:
+                    #form=salesform(initial={'product_id':uid,'category':cat})
+                    return render(request,'bill_page.html',{"form":form ,'img':img ,'cat':cat,'Error':str(e)})
+                    
+                        
+                        
             
+            
+        
+            else:
+                form=salesform(initial={'product_id':uid,'category':cat})
+                return render(request,'bill_page.html',{"form":form ,'img':img ,'cat':cat,'flg':'Validation_Error'})    
+                    
     else:
         form=salesform(initial={'product_id':uid,'category':cat})
         return render(request,'bill_page.html',{"form":form ,'img':img ,'cat':cat})

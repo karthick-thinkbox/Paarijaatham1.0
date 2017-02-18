@@ -34,6 +34,10 @@
     </ul>
   </div>
 </nav>
+
+{% if flg == 'Validation_Error' %}
+    <h3 class="bg-danger"> &nbsp &nbsp Please Fill All Fileds  </h3>
+{% endif %}
 {% if flg == 'soldout' %}
     <h3 class="bg-danger"> &nbsp &nbsp Product SoldOut  </h3>
 {% endif %}
