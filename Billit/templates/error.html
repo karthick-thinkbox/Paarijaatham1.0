@@ -17,7 +17,7 @@
       <a class="navbar-brand" href="#">Paarijaatham</a>
     </div>
     <ul class="nav navbar-nav">
-      <li class="active" ><a href="#">Home</a></li>
+      <li class="active" ><a href="/home/">Home</a></li>
       <li><a href="/upload/">Manage</a></li>
       <li><a href="/admin/">Admin</a></li>
     </ul>
@@ -31,21 +31,23 @@
 
 <h3> Welcome {{user}} </h3>
 
+{% if Error == 'Auth' %}
+    <p align='middle' class="bg-danger">you do not have Authentication to Upload</p>
+  {% endif %}
 
 
 
-
-<form action="" method ="post">
+<form action="/home/" method ="post">
   {% csrf_token %}
     
   <p align='middle'>  
   {{ form }}
     
   <p align='middle'>  
-<input type="submit" class="btn btn-primary" ,value="Find"> 
+<input type="submit" ,value="Find"> 
 
   {% if Error %}
-    <p align='middle' class="bg-danger">Error : {{Error}}</p>
+    <p align='middle'>Error : {{Error}}</p>
   {% endif %}
  </p>
   </p>             

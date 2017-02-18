@@ -20,8 +20,9 @@ from paarijaatham import settings
 from django.views import static
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^login/', auth_view.login,name='login_page'),
+    url(r'^login/', auth_view.login,{'template_name':'templates/login.html'},name='login_page'),
     url(r'^media/(.*)', static.serve,{'document_root':settings.MEDIA_ROOT}),
     url(r'^', include('Billit.urls')),
+    url(r'^report_builder/', include('report_builder.urls'))
 
 ]

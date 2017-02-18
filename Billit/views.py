@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import logout
 from .forms import prod_search,salesform,importform
@@ -26,7 +26,7 @@ def dashboard(request):
                     
                     return redirect('sold_page',pk=item_id,flag="soldout")
                 else:
-                    return redirect('sold_page',pk=item_id,flag="bill")
+                    return redirect('bill_page',uid=item_id)
                    
             except Exception as e:
                 sbox=prod_search()
@@ -43,9 +43,14 @@ def exitpage(request):
     logout(request)
     return render (request,'logout.html')
 
+
+def Autherror(request):
+    sbox=prod_search()
+    return render (request,'error.html',{'Error':'Auth' , 'form':sbox})
+
 class soldpage(LoginRequiredMixin,DetailView):
     model=inventory
-    template_name="templates/detail_page.html"
+    template_name="templates/detail.html"
     login_url='login_page'
     '''def statflg(self):
         return self.flag
@@ -75,31 +80,37 @@ def billpage(request,uid):
             return redirect('sold_page',pk=uid ,flag="soldout" )
             
         form=salesform(request.POST,request.FILES ,instance=row)
-        if form.is_valid():
-            sales_price=form.cleaned_data['sold_price']
-            cname=form.cleaned_data['cust_name']
-            cemail=form.cleaned_data['cust_Email']
-            cmobile=form.cleaned_data['cust_phone']
-            sprofit=int(sales_price) - cost
-            #row=form.save(commit=False)
-            row.sold_price=sales_price
-            row.cust_name=cname
-            row.cust_phone=cmobile
-            row.cust_Email=cemail
-            row.profit=sprofit
-            row.sales_status="Sold Out"
-            row.sold_by=str(current_user)
-            row.sales_date=date.today()
-            row.save()
+        try:
             
-            return redirect('sold_page',pk=uid,flag="deal")
-            
+            if form.is_valid():
+                sales_price=form.cleaned_data['sold_price']
+                cname=form.cleaned_data['cust_name']
+                cemail=form.cleaned_data['cust_Email']
+                cmobile=form.cleaned_data['cust_phone']
+                sprofit=int(sales_price) - cost
+                #row=form.save(commit=False)
+                row.sold_price=sales_price
+                row.cust_name=cname
+                row.cust_phone=cmobile
+                row.cust_Email=cemail
+                row.profit=sprofit
+                row.sales_status="Sold Out"
+                row.sold_by=str(current_user)
+                row.sales_date=date.today()
+                row.save()
+                
+                return redirect('sold_page',pk=uid,flag="deal")
+        
+        except Exception as e:
+            return redirect('bill_page',{'Billing Error':str(e)},uid=item_id)
+                
             
     else:
         form=salesform(initial={'product_id':uid,'category':cat})
-        return render(request,'bill_page.html',{"form":form ,'img':img})
+        return render(request,'bill_page.html',{"form":form ,'img':img ,'cat':cat})
 
-@login_required(login_url='login_page')
+@login_required(login_url='login_page') 
+@permission_required('Billit.add_bulk_import' ,login_url='Error_page')
 def bulkload(request):
     if request.method == "POST" :
         form=importform(request.POST ,request.FILES)
